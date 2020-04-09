@@ -101,26 +101,42 @@
     },
     "resources": [
         {
-            "name": "[variables('global_vnet_name')]",
-            "type": "Microsoft.Network/virtualNetworks",
-            "apiVersion": "2018-08-01",
+            "comments": "CREATE VIRTUAL NETWORK",
+            "type": "Microsoft.Resources/deployments",
+            "name": "CREATE_VNET",
+            "apiVersion": "2018-06-01",
             "resourceGroup": "[variables('global_vnet_resource_group')]",
             "condition": "[equals(variables('global_vnet_option'), 'Create new VNET')]",
-            "location": "[resourceGroup().location]",
             "properties": {
-                "addressSpace": {
-                    "addressPrefixes": [
-                        "[variables('global_vnet_prefix')]"
-                    ]
-                },
-                "subnets": [
-                    {
-                        "name": "[variables('global_subnet_name')]",
-                        "properties": {
-                            "addressPrefix": "[variables('global_subnet_prefix')]"
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": [
+
+                        {
+                        "name": "[variables('global_vnet_name')]",
+                        "type": "Microsoft.Network/virtualNetworks",
+                        "apiVersion": "2018-08-01",
+                        "location": "[resourceGroup().location]",
+                            "properties": {
+                                "addressSpace": {
+                                "addressPrefixes": [
+                                    "[variables('global_vnet_prefix')]"
+                                ]
+                            },
+                            "subnets": [
+                            {
+                                "name": "[variables('global_subnet_name')]",
+                                "properties": {
+                                    "addressPrefix": "[variables('global_subnet_prefix')]"
+                                }
+                            }
+                            ]
+                            }
                         }
-                    }
-                ]
+                    ]
+                }
             }
         },
         {
