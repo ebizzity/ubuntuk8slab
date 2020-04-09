@@ -146,7 +146,7 @@
         {
             "name": "[variables('global_vm_name')]",
             "type": "Microsoft.Compute/virtualMachines",
-            "apiVersion": "2017-03-30",
+            "apiVersion": "2019-03-01",
             "location": "[resourceGroup().location]",
             "dependsOn": [
                 "[resourceId('Microsoft.Network/networkInterfaces', variables('global_nic_name'))]"
@@ -170,7 +170,8 @@
                     "osDisk": {
                         "name": "[concat(parameters('vmname'),'OSDisk')]",
                         "caching": "ReadWrite",
-                        "createOption": "FromImage"
+                        "createOption": "FromImage",
+                        "managedDisk":{}
                     }
                 },
                 "networkProfile": {
