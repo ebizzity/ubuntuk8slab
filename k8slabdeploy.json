@@ -101,7 +101,7 @@
     },
     "resources": [
         {
-            "comments": "CREATE VIRTUAL NETWORK",
+            "comments": "CREATE VIRTUAL NETWORK and NICs",
             "type": "Microsoft.Resources/deployments",
             "name": "CREATE_VNET",
             "apiVersion": "2019-10-01",
@@ -133,33 +133,33 @@
                                     }
                                 ]
                             }
+                            
+                        },
+
+                        {
+                            "name": "[variables('global_nic_name')]",
+                            "type": "Microsoft.Network/networkInterfaces",
+                            "apiVersion": "2018-08-01",
+                            "location": "[resourceGroup().location]",
+                            "dependsOn": [
+                                "[resourceId('Microsoft.Network/virtualNetworks', variables('global_vnet_name'))]"
+                            ],
+                            "properties": {
+                                "ipConfigurations": [
+                                {
+                                    "name": "ipConfig1",
+                                    "properties": {
+                                        "privateIPAllocationMethod": "Dynamic",
+                                        "subnet": {
+                                            "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('global_vnet_name'), variables('global_subnet_name'))]"
+                                        }
+                                    }
+                                }
+                                ]
+                            }
                         }
                     ]
                 }
-            }
-        },
-
-
-        {
-            "name": "[variables('global_nic_name')]",
-            "type": "Microsoft.Network/networkInterfaces",
-            "apiVersion": "2018-08-01",
-            "location": "[resourceGroup().location]",
-            "dependsOn": [
-                "[resourceId('Microsoft.Network/virtualNetworks', variables('global_vnet_name'))]"
-            ],
-            "properties": {
-                "ipConfigurations": [
-                    {
-                        "name": "ipConfig1",
-                        "properties": {
-                            "privateIPAllocationMethod": "Dynamic",
-                            "subnet": {
-                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('global_vnet_name'), variables('global_subnet_name'))]"
-                            }
-                        }
-                    }
-                ]
             }
         },
 
@@ -170,7 +170,7 @@
             "apiVersion": "2019-03-01",
             "location": "[resourceGroup().location]",
             "dependsOn": [
-                "[resourceId('Microsoft.Network/networkInterfaces', variables('global_nic_name'))]"
+                "CREATE_VNET"
             ],
             "properties": {
                 "hardwareProfile": {
