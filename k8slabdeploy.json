@@ -1,0 +1,216 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+         "VNETOption": {
+            "type": "string",
+            "defaultValue": "Create new VNET",
+            "allowedValues": [
+                "Create new VNET",
+                "Use existing VNET"
+            ],
+            "metadata": {
+                "description": "VNET create option"
+            }
+        },
+        "VNETName": {
+            "type": "string",
+            "defaultValue": "k8slab-vnet",
+            "metadata": {
+                "description": "Enter a name for the virtual network."
+            }
+        },
+        "VNETResourceGroup": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "If you are deploying to an existing VNET that is in a different Resource Group than the lab, put it the name of the RG here."
+            }
+        },
+        "VNETPrefix": {
+            "type": "string",
+            "defaultValue": "10.220.1.0/24",
+            "metadata": {
+                "description": "Enter a prefix for the virtual network."
+            }
+        },
+        "subnetName": {
+            "type": "string",
+            "defaultValue": "lab-subnet",
+            "metadata": {
+                "description": "Enter a subnet name for the lab vm."
+            }
+        },
+        "subnetPrefix": {
+            "type": "string",
+            "defaultValue": "10.220.1.0/24",
+            "metadata": {
+                "description": "Enter a subnet prefix for the lab vm."
+            }
+        },
+        "vmname": {
+           "type": "string",
+           "metadata": {
+                "description": "Name for Lab-VM"
+            }
+        },
+        "username": {
+           "type": "string",
+           "metadata": {
+                "description": "Username"
+            }
+        },
+        "password": {
+           "type": "securestring",
+           "metadata": {
+                "description": "Password"
+            }
+        },
+        "VMSize": {
+           "type": "string",
+           "defaultValue": "Standard_D4s_v3",
+           "metadata": {
+                "description": "VMSize"
+            }
+        },
+        "(opt.) AppendStringToResources": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "If the NAME and CONFIGURATION of the created LBs/NSGs/VMs/AVSET/VNET match an existing LBs/NSGs/VMs/AVSET/VNET in the SAME resource group, the template will its skip creation.  If the new resource NAME matches, but the resource CONFIGURATION does not, the template will fail or will overwrite the existing resource."
+            }
+        }
+    },
+    "variables": {
+        "global_var_resource_group": "[resourceGroup().name]",
+        "global_var_appendedString": "[if(equals(parameters('(opt.) AppendStringToResources'), ''), '', parameters('(opt.) AppendStringToResources'))]",
+        "global_vnet_name": "[if(equals(parameters('VNETOption'), 'Use existing VNET'), parameters('VNETName'), take(replace(concat(parameters('VNETName'), variables('global_var_appendedString')), ' ', ''), 64))]",
+        "global_vnet_prefix": "[parameters('VNETPrefix')]",
+        "global_vnet_resource_group": "[if(equals(parameters('VNETResourceGroup'), ''), variables('global_var_resource_group'), parameters('VNETResourceGroup'))]",
+        "global_vnet_option": "[parameters('VNETOption')]",
+        "global_subnet_name": "[parameters('subnetName')]",
+        "global_subnet_prefix": "[parameters('subnetPrefix')]",
+        "global_vm_adminUsername": "[parameters('username')]",
+        "global_vm_adminPassword": "[parameters('password')]",
+        "global_vm_vmSize": "[parameters('VMSize')]",
+        "global_vm_name": "[parameters('vmname')]",
+        "global_nic_name": "[concat(variables('global_vm_name'),'-NetworkInterface')]"
+
+    },
+    "resources": [
+        {
+            "name": "[variables('global_vnet_name')]",
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2018-08-01",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[variables('global_vnet_prefix')]"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[variables('global_subnet_name')]",
+                        "properties": {
+                            "addressPrefix": "[variables('global_subnet_prefix')]"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "[variables('global_nic_name')]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2018-08-01",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', variables('global_vnet_name'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipConfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('global_vnet_name'), variables('global_subnet_name'))]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "[resourceId('Microsoft.Compute/virtualMachines', variables('global_vm_name'))]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2017-03-30",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('global_nic_name'))]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[variables('global_vm_vmSize')]"
+                },
+                "osProfile": {
+                    "computerName": "[variables('global_vm_name')]",
+                    "adminUsername": "[variables('global_vm_adminUsername')]",
+                    "adminPassword": "[variables('global_vm_adminPassword')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "Canonical",
+                        "offer": "UbuntuServer",
+                        "sku": "18.04-LTS",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "name": "ubuntuVM1-OSDisk",
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage"
+                    }
+                },
+                "priority": "Spot",
+                "evictionPolicy": "Deallocate",
+                "billingProfile": {
+                    "maxPrice": -1
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('global_nic_name'))]"
+                        }
+                    ]
+                }
+            }
+        },
+        
+        {
+            "name": "[concat(variables('global_vm_name'),'/customScript')]",
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "2018-06-01",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "displayName": "customScript to install minikube/RDP for LAB VM"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', variables('global_vm_name'))]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.OSTCExtensions",
+                "type": "CustomScriptForLinux",
+                "typeHandlerVersion": "1.4",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "fileUris": [
+                        "https://raw.githubusercontent.com/ebizzity/ubuntuk8slab/master/setup.sh"
+                    ],
+                    "commandToExecute": "sh setup.sh"
+                }
+            }
+        }
+    ],
+    "outputs": {},
+    "functions": []
+}
