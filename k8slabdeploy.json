@@ -50,12 +50,14 @@
         },
         "vmname": {
            "type": "string",
+           "defaultValue": "K8sLabVM",
            "metadata": {
                 "description": "Name for Lab-VM"
             }
         },
         "username": {
            "type": "string",
+           "defaultValue": "student",
            "metadata": {
                 "description": "Username"
             }
@@ -142,7 +144,7 @@
             }
         },
         {
-            "name": "[resourceId('Microsoft.Compute/virtualMachines', variables('global_vm_name'))]",
+            "name": "[variables('global_vm_name')]",
             "type": "Microsoft.Compute/virtualMachines",
             "apiVersion": "2017-03-30",
             "location": "[resourceGroup().location]",
@@ -166,15 +168,10 @@
                         "version": "latest"
                     },
                     "osDisk": {
-                        "name": "ubuntuVM1-OSDisk",
+                        "name": "[concat(parameters('vmname'),'OSDisk')]",
                         "caching": "ReadWrite",
                         "createOption": "FromImage"
                     }
-                },
-                "priority": "Spot",
-                "evictionPolicy": "Deallocate",
-                "billingProfile": {
-                    "maxPrice": -1
                 },
                 "networkProfile": {
                     "networkInterfaces": [
@@ -182,11 +179,16 @@
                             "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('global_nic_name'))]"
                         }
                     ]
+                },
+                "priority": "Spot",
+                "evictionPolicy": "Deallocate",
+                "billingProfile": {
+                    "maxPrice": -1
                 }
             }
         },
-        
-        {
+
+       {
             "name": "[concat(variables('global_vm_name'),'/customScript')]",
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "apiVersion": "2018-06-01",
@@ -209,7 +211,9 @@
                     "commandToExecute": "sh setup.sh"
                 }
             }
-        }
+        } 
+        
+        
     ],
     "outputs": {},
     "functions": []
