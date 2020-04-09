@@ -1,7 +1,7 @@
 # ubuntuk8slab
 
 ### Deploy Template to Azure
-[<img src="http://azuredeploy.net/deploybutton.png"/>](https://portal.azure.com/#create/Microsoft.Template/uri/)
+[<img src="https://aka.ms/deploytoazurebutton"/>](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Febizzity%2Fubuntuk8slab%2Fmaster%2Fk8slabdeploy.json)
 
 ### Login in to VM via RDP  
 
