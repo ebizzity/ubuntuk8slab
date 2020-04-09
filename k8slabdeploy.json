@@ -156,7 +156,7 @@
                     "properties": {
                         "privateIPAllocationMethod": "Dynamic",
                         "subnet": {
-                            "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('global_vnet_name'), variables('global_subnet_name'))]"
+                            "id": "[concat(resourceId(variables('global_vnet_resource_group'), 'Microsoft.Network/virtualNetworks', variables('global_vnet_name')), '/subnets/', variables('global_subnet_name'))]"
                         }
                     }
                 }
