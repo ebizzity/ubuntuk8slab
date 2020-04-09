@@ -104,61 +104,38 @@
             "comments": "CREATE VIRTUAL NETWORK",
             "type": "Microsoft.Resources/deployments",
             "name": "CREATE_VNET",
-            "apiVersion": "2018-06-01",
+            "apiVersion": "2019-10-01",
             "resourceGroup": "[variables('global_vnet_resource_group')]",
             "condition": "[equals(variables('global_vnet_option'), 'Create new VNET')]",
             "properties": {
-                "mode": "Incremental",
-                "template": {
-                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "mode": "Incremental",
+                    "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
                     "contentVersion": "1.0.0.0",
                     "resources": [
-
                         {
-                        "name": "[variables('global_vnet_name')]",
-                        "type": "Microsoft.Network/virtualNetworks",
-                        "apiVersion": "2018-08-01",
-                        "location": "[resourceGroup().location]",
+                            "name": "[variables('global_vnet_name')]",
+                            "type": "Microsoft.Network/virtualNetworks",
+                            "apiVersion": "2018-08-01",
+                            "location": "[resourceGroup().location]",
                             "properties": {
                                 "addressSpace": {
-                                "addressPrefixes": [
-                                    "[variables('global_vnet_prefix')]"
+                                    "addressPrefixes": [
+                                        "[variables('global_vnet_prefix')]"
+                                    ]
+                                },
+                                "subnets": [
+                                    {
+                                        "name": "[variables('global_subnet_name')]",
+                                        "properties": {
+                                            "addressPrefix": "[variables('global_subnet_prefix')]"
+                                        }
+                                    }
                                 ]
-                            },
-                            "subnets": [
-                            {
-                                "name": "[variables('global_subnet_name')]",
-                                "properties": {
-                                    "addressPrefix": "[variables('global_subnet_prefix')]"
-                                }
-                            }
-                            ]
                             }
                         }
                     ]
                 }
-            }
-        },
-        {
-            "name": "[variables('global_nic_name')]",
-            "type": "Microsoft.Network/networkInterfaces",
-            "apiVersion": "2018-08-01",
-            "location": "[resourceGroup().location]",
-            "dependsOn": [
-                "[resourceId('Microsoft.Network/virtualNetworks', variables('global_vnet_name'))]"
-            ],
-            "properties": {
-                "ipConfigurations": [
-                    {
-                        "name": "ipConfig1",
-                        "properties": {
-                            "privateIPAllocationMethod": "Dynamic",
-                            "subnet": {
-                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('global_vnet_name'), variables('global_subnet_name'))]"
-                            }
-                        }
-                    }
-                ]
             }
         },
         {
