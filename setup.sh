@@ -1,8 +1,10 @@
 #!/bin/bash
 apt-get update
 echo virtualbox-ext-pack virtualbox-ext-pack/license select true | sudo debconf-set-selections
-apt-get install -y apt-transport-https virtualbox virtualbox-ext-pack xrdp mate-core mate-desktop-environment mate-notification-daemon
-sed -i.bak '/fi/a #xrdp multiple users configuration \n mate-session \n' /etc/xrdp/startwm.sh
+apt-get install -y apt-transport-https virtualbox virtualbox-ext-pack xfce4 xrdp 
+echo xfce4-session >/home/student/.xsession
+echo xfce4-session >~/.xsession
+systemctl enable xrdp
 
 # allow just RDP through the local firewall
 ufw allow 3389/tcp
