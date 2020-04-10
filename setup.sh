@@ -9,7 +9,7 @@ virtualbox \
 virtualbox-ext-pack \
 mate-core \
 mate-desktop-environment \
-mate-notification-daemon
+mate-notification-daemon \
 indicator-sound-gtk2 \
 indicator-application-gtk2 \
 xrdp 
