@@ -18,7 +18,30 @@ The deployment will run for a few minutes. It is building the VM and downloading
 
 ---
 
-### Login in to VM via RDP  
+### Login to VM via SSH
+
+Hint - (Bastion is a great solution for this ;) )
+
+Connect to your new VM via your preferred ssh tool.
+
+![SSH Login](images/ssh-login.png)
+
+### Start-up Minikube
+
+`minikube start`
+
+![Miniukube Start-ssh](images/ssh-minikube.png)
+
+`minikube status`
+
+![Miniukube Status-ssh](images/ssh-minikube-status.png)
+
+`kubectl get all --all-namespaces`
+
+![ssh-kubectl](images/ssh-kubectl.png)
+
+---
+### Login to VM via RDP - Alternate
 
 Hint - (Bastion is a great solution for this ;) )
 
